@@ -1,0 +1,34 @@
+#!/bin/bash
+
+function git_error() {
+    echo "Error, this package is not exists!" 
+    exit
+}
+
+function makepkg_error_one() {
+    echo "Error making package!\nTrying making with other options..."
+    makepkg -sri --noconfirm
+}
+
+function makepkg_error_two() {
+    echo "Error making package! This package may'be corrupted..."
+    exit
+}
+
+if [ "$2" = "" ]; then
+    cd ~
+    echo "Getting files from branch..."
+    git clone https://aur.archlinux.org/$1.git &> /dev/null || git_error
+    echo "Done!"
+else
+    if [ $2 = "-jsta" ]; then
+        cd ~/$1/
+        echo "Making AUR package..."
+        makepkg -si --noconfirm &> /dev/null  || makepkg_error_one || makepkg_error_two
+        exit
+    fi
+fi
+
+cd ~/$1/
+echo "Making AUR package..."
+makepkg -si --noconfirm &> /dev/null  || makepkg_error_one || makepkg_error_two
